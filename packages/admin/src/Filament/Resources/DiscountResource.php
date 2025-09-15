@@ -254,10 +254,17 @@ class DiscountResource extends BaseResource
         return $inputs;
     }
 
-    public static function getDiscountTypeFormComponent(): Component
+  public static function getDiscountTypeFormComponent(): Component
     {
+        $types = Discounts::getTypes()->reject(fn ($type) => $type instanceof BuyXGetY);
+
+        // Log remaining discount types (class => name)
+        \Illuminate\Support\Facades\Log::info('Lunar discount types', $types->mapWithKeys(
+            fn ($type) => [get_class($type) => $type->getName()]
+        )->toArray());
+
         return Forms\Components\Select::make('type')->options(
-            Discounts::getTypes()->mapWithKeys(
+            $types->mapWithKeys(
                 fn ($type) => [get_class($type) => $type->getName()]
             )
         )->required()->live();
